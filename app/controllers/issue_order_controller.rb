@@ -37,6 +37,14 @@ class IssueOrderController < ApplicationController
   end
 
   def remove_bucket
+    @bucket = IssueBucket.find(params[:id])
+    Issue.update_all(['issue_bucket_id=?', 0], ['issue_bucket_id=?', params[:id]])
+    @bucket.destroy
+    
+    render :update do |page|
+      page['success'].innerHTML = "Removed - Refresh to see the change"
+      page['success'].show()
+    end
   end
 
   def edit_bucket
