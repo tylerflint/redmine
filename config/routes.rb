@@ -134,6 +134,12 @@ ActionController::Routing::Routes.draw do |map|
     issues_routes.connect 'issues/:action'
   end
   
+  map.with_options :controller => 'issue_order' do |issue_order_routes|
+    issue_order_routes.with_options :conditions => {:method => :get} do |issue_order_views|
+      issue_order_views.connect 'projects/:project_id/issue_orders', :action => 'index'
+    end
+  end
+  
   map.with_options  :controller => 'issue_relations', :conditions => {:method => :post} do |relations|
     relations.connect 'issues/:issue_id/relations/:id', :action => 'new'
     relations.connect 'issues/:issue_id/relations/:id/destroy', :action => 'destroy'
