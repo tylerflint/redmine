@@ -41,7 +41,7 @@ Redmine::AccessControl.map do |map|
   map.permission :manage_members, {:projects => :settings, :members => [:new, :edit, :destroy, :autocomplete_for_member]}, :require => :member
   map.permission :manage_versions, {:projects => [:settings, :add_version], :versions => [:edit, :close_completed, :destroy]}, :require => :member
   map.permission :add_subprojects, {:projects => :add}, :require => :member
-  
+
   map.project_module :issue_tracking do |map|
     # Issue categories
     map.permission :manage_categories, {:projects => [:settings, :add_issue_category], :issue_categories => [:edit, :destroy]}, :require => :member
@@ -88,6 +88,12 @@ Redmine::AccessControl.map do |map|
   map.project_module :documents do |map|
     map.permission :manage_documents, {:documents => [:new, :edit, :destroy, :add_attachment]}, :require => :loggedin
     map.permission :view_documents, :documents => [:index, :show, :download]
+  end
+  
+  map.project_module :issue_orders do |map|
+    map.permission :view_issue_orders, :issue_orders => [:index]
+    map.permission :manage_issue_orders, :issue_orders => [:save_priorites, :save_priority], :require => :loggedin
+    map.permission :manage_issue_buckets, :issue_buckets => [:add_bucket, :remove_bucket, :edit_bucket], :require => :member
   end
   
   map.project_module :files do |map|
@@ -151,20 +157,16 @@ end
 Redmine::MenuManager.map :project_menu do |menu|
   menu.push :overview, { :controller => 'projects', :action => 'show' }
   menu.push :activity, { :controller => 'projects', :action => 'activity' }
-  menu.push :roadmap, { :controller => 'projects', :action => 'roadmap' }, 
-              :if => Proc.new { |p| p.shared_versions.any? }
+  menu.push :roadmap, { :controller => 'projects', :action => 'roadmap' }, :if => Proc.new { |p| p.shared_versions.any? }
   menu.push :issues, { :controller => 'issues', :action => 'index' }, :param => :project_id, :caption => :label_issue_plural
-  menu.push :new_issue, { :controller => 'issues', :action => 'new' }, :param => :project_id, :caption => :label_issue_new,
-              :html => { :accesskey => Redmine::AccessKeys.key_for(:new_issue) }
+  menu.push :new_issue, { :controller => 'issues', :action => 'new' }, :param => :project_id, :caption => :label_issue_new, :html => { :accesskey => Redmine::AccessKeys.key_for(:new_issue) }
+  menu.push :issue_orders, { :controller => 'issue_order', :action => 'index' }, :param => :project_id, :caption => :label_issue_priority_plural
   menu.push :news, { :controller => 'news', :action => 'index' }, :param => :project_id, :caption => :label_news_plural
   menu.push :documents, { :controller => 'documents', :action => 'index' }, :param => :project_id, :caption => :label_document_plural
-  menu.push :wiki, { :controller => 'wiki', :action => 'index', :page => nil }, 
-              :if => Proc.new { |p| p.wiki && !p.wiki.new_record? }
-  menu.push :boards, { :controller => 'boards', :action => 'index', :id => nil }, :param => :project_id,
-              :if => Proc.new { |p| p.boards.any? }, :caption => :label_board_plural
+  menu.push :wiki, { :controller => 'wiki', :action => 'index', :page => nil }, :if => Proc.new { |p| p.wiki && !p.wiki.new_record? }
+  menu.push :boards, { :controller => 'boards', :action => 'index', :id => nil }, :param => :project_id, :if => Proc.new { |p| p.boards.any? }, :caption => :label_board_plural
   menu.push :files, { :controller => 'projects', :action => 'list_files' }, :caption => :label_file_plural
-  menu.push :repository, { :controller => 'repositories', :action => 'show' },
-              :if => Proc.new { |p| p.repository && !p.repository.new_record? }
+  menu.push :repository, { :controller => 'repositories', :action => 'show' },  :if => Proc.new { |p| p.repository && !p.repository.new_record? }
   menu.push :settings, { :controller => 'projects', :action => 'settings' }, :last => true
 end
 
