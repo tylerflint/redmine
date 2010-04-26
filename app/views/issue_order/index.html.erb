@@ -46,8 +46,8 @@
 				<input type="checkbox" onclick="$$('.bucket-0').each(Element.toggle);">No Bucket</a>
 				<div id="buckets">
 		  			<% @buckets.each do |bucket| %>
-						<input type="checkbox" onclick="$$('.bucket-<%=bucket.id%>').each(Element.toggle);" id="bucket[<%= bucket.id %>]" checked><%= bucket.name %></input>
-						<a href="javascript: void(0);" onclick="removeBucket(<%=bucket.id%>);">(X)</a><br/>
+						<input type="checkbox" onclick="$$('.bucket-<%=bucket.id%>').each(Element.toggle);" id="bucket[<%= bucket.id %>]" checked><span style="color: <%= bucket.name %>"><%= bucket.name %></span></input>
+						<% if (User.current.admin?) %><a href="javascript: void(0);" onclick="removeBucket(<%=bucket.id%>);">(X)</a><% end %><br/>
 					<% end %> 
 				</div>
 		    </fieldset>
@@ -61,7 +61,7 @@
 						<span class="column_time">Estimated Time</span>
 				</div>
 				<% @unordered_issues.each do |issue| %>
-				<div id="issue_<%= issue.id %>"  style="color:<%= issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %>" class="sortable bucket-<%= issue.issue_bucket_id %> <%= issue.css_classes %>">
+				<div id="issue_<%= issue.id %>"  style="color:<%= issue.issue_bucket_id > 0 ? issue.issue_bucket.name : '' %>" class="sortable bucket-<%= issue.issue_bucket_id %> <%= issue.css_classes %>">
 				    <span class="column_name"><%= link_to issue.subject, :controller => 'issues', :action => 'show', :id => issue %></span>
 					<% if (User.current.admin?) %>
 						<span class="column_bucket">
