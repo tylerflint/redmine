@@ -1,4 +1,8 @@
 class IssueOrderController < ApplicationController
+  layout 'base'
+  
+  before_filter :find_project, :only => :index
+  
   helper :journals
   helper :projects
   include ProjectsHelper   
@@ -28,12 +32,14 @@ class IssueOrderController < ApplicationController
   def add_bucket
     @bucket = IssueBucket.new(params[:issue_bucket])
     @bucket.save
+
+    render :js => "window.location.reload()"
     
-    render :update do |page|
-      page['addbuckets'].hide
-      page.insert_html :bottom, 'buckets', '<input type="checkbox" id="bucket[' + @bucket.id.to_s + ']" checked>' + @bucket.name + '</input>'
-      page['name:issue_bucket[name]'].clear
-    end
+    # render :update do |page|
+    #   page['addbuckets'].hide
+    #   page.insert_html :bottom, 'buckets', '<input type="checkbox" id="bucket[' + @bucket.id.to_s + ']" checked>' + @bucket.name + '</input>'
+    #   page['name:issue_bucket[name]'].clear
+    # end
   end
 
   def remove_bucket
@@ -41,16 +47,14 @@ class IssueOrderController < ApplicationController
     Issue.update_all(['issue_bucket_id=?', 0], ['issue_bucket_id=?', params[:id]])
     @bucket.destroy
     
-    render :update do |page|
-      page['success'].innerHTML = "Removed - Refresh to see the change"
-      page['success'].show()
-    end
+   render :js => "window.location.reload()"
+   
   end
 
   def edit_bucket
   end
 
-  def save_issue
+  def save
     if params[:issue]
       @issue = Issue.find(params[:issue][:id])
       @issue.update_attributes(params[:issue])

@@ -1,8 +1,31 @@
 <style>
-	.column_name{ loat: left; height: 20px; width: 450px; }
-	.column_bucket{ loat: left; height: 20px;width: 100px; }
-	.column_time{ loat: left; height: 20px;width: 150px; }
+	/* make containers holding floats expand to hold content */
+	.clear:after{
+		content: ".";
+		display: block;
+		height: 0;
+		font-size: 0;
+		clear: both;
+		visibility: hidden;
+	}
+
+	.clear{
+		min-height: 1px;
+	}
+	*html .clear{
+		height: 1px;
+	}
+	.column_name{ float: left; height: 20px; width: 450px; }
+	.column_bucket{ float: left; height: 20px;width: 100px; }
+	.column_time{ float: left; height: 20px;width: 175px; }
+	.column_start{ float: left; height: 20px; width: 250px;}
 	.sortable { cursor: move;}
+	.sortable:hover {background: none repeat scroll 0 0 #FFFFDD;}
+	.row		{position: relative; width: 100%; height:20px;
+		border:0;
+		margin-bottom:2px;
+		padding:3px;
+	}
 	div#unordered_issues div.sortable span.column_start {display:none;}
 	div#issues div.sortable span.column_time {display:none;}
 	div.dropmarker {
@@ -17,19 +40,15 @@
 	   }
 	
 	div.issue {
-	background:none repeat scroll 0 0 transparent;
 	border:0;
 	margin-bottom:2px;
 	padding:3px;
 	}
 	
 	div.list {
-		background:none repeat scroll 0 0;
 		border:1px solid #D7D7D7;
 		margin-bottom:6px;
-		padding:6px;
 	}
-	
 </style>
 		<div id="query_form_content">
 			<% if (User.current.admin?) %>
@@ -43,87 +62,109 @@
 			<% end %>
 		    <fieldset class="collapsible">
 				<legend onclick="toggleFieldset(this);"><%= h("Buckets") %></legend>
-				<input type="checkbox" onclick="$$('.bucket-0').each(Element.toggle);">No Bucket</a>
 				<div id="buckets">
+					<input id="bucket_none" type="checkbox" onclick="toggleBucket(this)">None</a>
+					<input id="bucket_all" type="checkbox" class="bucket" onclick="toggleBucket(this)" checked="checked">All</a>
 		  			<% @buckets.each do |bucket| %>
-						<input type="checkbox" onclick="$$('.bucket-<%=bucket.id%>').each(Element.toggle);" id="bucket[<%= bucket.id %>]" checked><%= bucket.name %></input>
-						<a href="javascript: void(0);" onclick="removeBucket(<%=bucket.id%>);">(X)</a><br/>
-					<% end %> 
+						<input type="checkbox" class="bucket" onclick="toggleBucket(this)" id="bucket_<%= bucket.id %>" checked="checked"><%= bucket.name %></input>
+						<a href="javascript: void(0);" onclick="removeBucket(<%=bucket.id%>);">(X)</a>
+					<% end %>
 				</div>
 		    </fieldset>
 		</div>
 		<br/>
-			<h1>Unordered Issues</h1>
-			<div id="unordered_issues" class="list issues" style="margin-right: 5px;">
-				<div style="font-weight: bold">
-						<span class="column_name">Issues</span>
-						<span class="column_bucket">Bucket</span>
-						<span class="column_time">Estimated Time</span>
+			<!--
+			<h3>Un-Prioritized</h3>
+			-->
+			<div id="unordered_issues" class="list issues clear header" style="margin-right: 5px;">
+				<div style="font-weight: bold; background-color: #EEEEEE;" class="row clear">
+						<div class="column_name">Un-Prioritized</div>
+						<div class="column_bucket">Bucket</div>
+						<!--
+						<span class="column_time">Estimated Hours</span>
+						-->
 				</div>
 				<% @unordered_issues.each do |issue| %>
-				<div id="issue_<%= issue.id %>"  style="color:<%= issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %>" class="sortable bucket-<%= issue.issue_bucket_id %> <%= issue.css_classes %>">
-				    <span class="column_name"><%= link_to issue.subject, :controller => 'issues', :action => 'show', :id => issue %></span>
+				<div id="issue_<%= issue.id %>"  class="sortable row clear bucket_<%= issue.issue_bucket_id %>">
+				    <div class="column_name"><%= link_to issue.subject, :controller => 'issues', :action => 'show', :id => issue %></div>
 					<% if (User.current.admin?) %>
-						<span class="column_bucket">
-							<select id="issue_<%= issue.id %>_issue_bucket_id">
-								<option value="0" <%= issue.issue_bucket_id > 0 ? '' : 'selected' %>>NONE</option>
+						<div class="column_bucket">
+							<select id="issue_<%= issue.id %>_issue_bucket_id" onchange="updateBucket(this, <%= issue.id %>)">
+								<option value="0" <%= issue.issue_bucket_id && issue.issue_bucket_id > 0 ? '' : 'selected' %>>NONE</option>
 							<% @buckets.each do |bucket| %>
-								<option value="<%= bucket.id %>" <%= issue.issue_bucket_id == bucket.id ? 'selected' : '' %>><%= bucket.name %></option>
+								<option value="<%= bucket.id %>" <%= issue.issue_bucket_id == bucket.id ? 'selected="selected"' : '' %>><%= bucket.name %></option>
 							<% end %>
 							</select>
-						</span>
-						<span class="column_time"><input type="text" value="<%= issue.estimated_hours %>" id="issue_<%= issue.id %>_estimated_hours"</span>
-						<span class="column_start">TBD</span>
-						<span class="column_save" id="save_issue_<%= issue.id %>"><a href="javascript: void(0);" onclick="saveIssue(<%= issue.id %>)">Save</a></span>
+						</div>
+						<!--
+						<div class="column_time"><input type="text" value="<%= issue.estimated_hours %>" id="issue_<%= issue.id %>_estimated_hours" /></div>
+						<div class="column_start">TBD</div>
+						<div class="column_save" id="save_issue_<%= issue.id %>"><a href="javascript: void(0);" onclick="saveIssue(<%= issue.id %>)">Save</a></div>
+						-->
 					<% else %>
-						<span class="column_bucket"><%= issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></span>
-						<span class="column_time"><%= issue.estimated_hours %></span>
-						<span class="column_start">TBD</span>
+						<div class="column_bucket"><%= issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></div>
+						<!--
+						<div class="column_time"><%= issue.estimated_hours %></div>
+						<div class="column_start">TBD</div>
+						-->
 					<% end %>
 				</div>
 				<% end %>
 			</div><br/>
-			<h1>Ordered Issues</h1>
-			<div id="issues" class="list issues"  style="margin-right: 5px;" >
-				<div style="font-weight: bold">
-						<span class="column_name">Issues</span>
-						<span class="column_bucket">Bucket</span>
-						<span class="column_start">Earliest Start Time*</span>
+			<!--
+			<h3>Current Priority</h3>
+			-->
+			<div id="issues" class="list issues clear header"  style="margin-right: 5px;" >
+				<div style="font-weight: bold; background-color: #EEEEEE;" class="row clear">
+						<div class="column_name">Current Prioritization</div>
+						<div class="column_bucket">Bucket</div>
+						<div style="float:right"><a href="javascript: void(0);" style="display:none;" id="saveOrder" onclick="saveOrder();">Save Order</a> &nbsp; <span id="success"></span></div>
+						<!--
+						<div class="column_start">Earliest Start Time*</div>
+						-->
 				</div>
 				<% @ordered_issues.each do |issue| %>
-				<div id="issue_<%= issue.id %>"  style="color:<%= issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %>" class="sortable bucket-<%= issue.issue_bucket_id %> <%= issue.css_classes %>">
-				    <span class="column_name"><%= link_to issue.subject, :controller => 'issues', :action => 'show', :id => issue %></span>
+				<div id="issue_<%= issue.id %>"  class="sortable row clear bucket_<%= issue.issue_bucket_id %>">
+				    <div class="column_name"><%= link_to issue.subject, :controller => 'issues', :action => 'show', :id => issue %></div>
 					<% if (User.current.admin?) %>
-						<span class="column_bucket">
-							<select id="issue_<%= issue.id %>_issue_bucket_id">
-								<option value="0" <%= issue.issue_bucket_id > 0 ? '' : 'selected' %>>NONE</option>
+						<div class="column_bucket">
+							<select id="issue_<%= issue.id %>_issue_bucket_id" onchange="updateBucket(this, <%= issue.id %>)">
+								<option value="0" <%= issue.issue_bucket_id && issue.issue_bucket_id > 0 ? '' : 'selected' %>>NONE</option>
 							<% @buckets.each do |bucket| %>
-								<option value="<%= bucket.id %>" <%= issue.issue_bucket_id == bucket.id ? 'selected' : '' %>><%= bucket.name %></option>
+								<option value="<%= bucket.id %>" <%= issue.issue_bucket_id == bucket.id ? 'selected="selected"' : '' %>><%= bucket.name %></option>
 							<% end %>
 							</select>
-						</span>
-						<span class="column_time"><input type="text" value="<%= issue.estimated_hours %>" id="issue_<%= issue.id %>_estimated_hours"</span>
-						<span class="column_start">TBD</span>
-						<span class="column_save" id="save_issue_<%= issue.id %>"><a href="javascript: void(0);" onclick="saveIssue(<%= issue.id %>)">Save</a></span>
+						</div>
+						<!--
+						<div class="column_time"><input type="text" value="<%= issue.estimated_hours %>" id="issue_<%= issue.id %>_estimated_hours" /></div>
+						<div class="column_start">TBD</div>
+						<div class="column_save" id="save_issue_<%= issue.id %>"><a href="javascript: void(0);" onclick="saveIssue(<%= issue.id %>)">Save</a></div>
+						-->
 					<% else %>
-						<span class="column_bucket"><%= issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></span>
-						<span class="column_time"><%= issue.estimated_hours %></span>
-						<span class="column_start">TBD</span>
+						<div class="column_bucket"><%= issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></div>
+						<!--
+						<div class="column_time"><%= issue.estimated_hours %></div>
+						<div class="column_start">TBD</div>
+						-->
 					<% end %>
 				</div>
 				<% end %>
 			</div>
 		<div style="margin-right: 5px; width: 720px;">
-			<div><div style="float:right"><a href="javascript: void(0);" style="display:none;" id="saveOrder" onclick="saveOrder();">Save Order</a> &nbsp; <span id="success"></span></div></div>
+			<div></div>
 		</div><br/><br/>
+		<!--
 		* Other projects may move this number around, but this is the earliest estimated start time for the given issue.
+		-->
 		<script>
 			sections = ['unordered_issues', 'issues'];
-			Sortable.create('unordered_issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true})
-			Sortable.create('issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true, onUpdate: function(){ $('saveOrder').show(); $('success').hide(); updateEstimatedTimes(); }})
-			updateEstimatedTimes();
+			Sortable.create('unordered_issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true, onUpdate: function(){colorRows()}})
+			Sortable.create('issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true, onUpdate: function(){ $('saveOrder').show(); $('success').hide(); updateEstimatedTimes(); colorRows(); }})
+			updateEstimatedTimes()
+			colorRows()
 			
 			function updateEstimatedTimes(){
+				return true;
 				var bucketTime = [];
 				if ($('issues').select('.sortable').length > 0){
 					$('issues').select('.sortable').each(function(issue){
@@ -144,22 +185,21 @@
 								issue.select('.column_start').first().innerHTML = "Immediately";
 								bucketTime[bucket] = Math.ceil(time/8);
 							}
-							console.log(bucket + ": " + time);
 						}else{
 							issue.select('.column_start').first().innerHTML = "-";
 						}
 					});
-					
 				}
 			}
 			
-			function saveIssue(issue_id){
-				new Ajax.Request('/issue_order/save_issue', {
+			function saveIssue(issue_id, bucket_id){
+				new Ajax.Request('/issue_order/save', {
 					evalScripts:true,
+					method: 'post',
 					parameters:{
 						'issue[id]': issue_id,
-						'issue[estimated_hours]': $('issue_' + issue_id + '_estimated_hours').value,
-						'issue[issue_bucket_id]': $('issue_' + issue_id + '_issue_bucket_id').value
+						// 'issue[estimated_hours]': $('issue_' + issue_id + '_estimated_hours').value,
+						'issue[issue_bucket_id]': bucket_id
 					}
 				});
 			}
@@ -173,7 +213,6 @@
 			
 			function saveOrder(){
 				//this needs to serialize the order of the ordered_issues and unordered_issues lists, and use them to save orders.
-				console.log("Issues Length: " + $('issues').select('.sortable').length);
 				var unordered_issue_array = "";
 				if ($('unordered_issues').select('.sortable').length > 0){
 					unordered_issue_array = Sortable.sequence('unordered_issues').join(",");
@@ -191,5 +230,73 @@
 								onSuccess: function() { $('saveOrder').hide(); $('success').show();}
 				}); 
 				return false;
+			}
+			
+			function colorRows () {
+				var count = 1
+				$$('.sortable').each(function(i){
+					if(count % 2 == 0){
+						i.removeClassName('odd')
+						i.addClassName('even')
+					}else{
+						i.removeClassName('even')
+						i.addClassName('odd')
+					}
+					count++
+				})
+			}
+			
+			function updateBucket (select, issueId) {
+				var row = select.up('.row')
+				row.classNames().each(function(c){
+					if (c.match(/bucket/))
+						row.removeClassName(c)
+				})
+				row.addClassName('bucket_' + select.value)
+				saveIssue(issueId, select.value)
+			}
+			
+			function toggleBucket (bucket) {
+				var state = (bucket.checked)? 'on' : 'off'
+				// bucket_none
+				if (bucket.id == 'bucket_none'){
+					// uncheck all boxes
+					$$('.bucket').each(function(box){
+						box.checked = false
+					})
+					$$('.sortable').each(function(row){
+						if (row.hasClassName('bucket_') || row.hasClassName('bucket_0')){
+							if(state == 'on')
+								row.show()
+							else
+								row.hide()
+						} else {
+							if(state == 'on')
+								row.hide()
+							else
+								row.show()
+						}
+					})
+					// hide all issues without the 'none' class
+				// bucket_all	
+				} else if (bucket.id == 'bucket_all'){
+					$$('.bucket').each(function(box){
+						box.checked = true
+					})
+					$('bucket_none').checked = false
+					$$('.sortable').each(function(row){
+						row.show()
+					})
+				} else {
+					$('bucket_none').checked = false
+					$$('.sortable').each(function(row){
+						if (row.hasClassName(bucket.id)){
+							if (state == 'on')
+								row.show()
+							else
+								row.hide()
+						}
+					})
+				}
 			}
 		</script>

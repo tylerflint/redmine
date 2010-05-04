@@ -90,10 +90,10 @@ Redmine::AccessControl.map do |map|
     map.permission :view_documents, :documents => [:index, :show, :download]
   end
   
-  map.project_module :issue_orders do |map|
-    map.permission :view_issue_orders, :issue_orders => [:index]
-    map.permission :manage_issue_orders, :issue_orders => [:save_priorites, :save_priority], :require => :loggedin
-    map.permission :manage_issue_buckets, :issue_buckets => [:add_bucket, :remove_bucket, :edit_bucket], :require => :member
+  map.project_module :issue_order do |map|
+    map.permission :view_issue_orders, :issue_order => [:index], :require => :loggedin
+    map.permission :manage_issue_orders, :issue_order => [:save_priorites, :save_priority], :require => :loggedin
+    map.permission :manage_issue_buckets, :issue_bucket => [:add_bucket, :remove_bucket, :edit_bucket], :require => :member
   end
   
   map.project_module :files do |map|
@@ -160,7 +160,7 @@ Redmine::MenuManager.map :project_menu do |menu|
   menu.push :roadmap, { :controller => 'projects', :action => 'roadmap' }, :if => Proc.new { |p| p.shared_versions.any? }
   menu.push :issues, { :controller => 'issues', :action => 'index' }, :param => :project_id, :caption => :label_issue_plural
   menu.push :new_issue, { :controller => 'issues', :action => 'new' }, :param => :project_id, :caption => :label_issue_new, :html => { :accesskey => Redmine::AccessKeys.key_for(:new_issue) }
-  menu.push :issue_orders, { :controller => 'issue_order', :action => 'index' }, :param => :project_id, :caption => :label_issue_priority_plural
+  menu.push :issue_order, { :controller => 'issue_order', :action => 'index' }, :param => :project_id, :caption => :label_issue_priority_plural
   menu.push :news, { :controller => 'news', :action => 'index' }, :param => :project_id, :caption => :label_news_plural
   menu.push :documents, { :controller => 'documents', :action => 'index' }, :param => :project_id, :caption => :label_document_plural
   menu.push :wiki, { :controller => 'wiki', :action => 'index', :page => nil }, :if => Proc.new { |p| p.wiki && !p.wiki.new_record? }
