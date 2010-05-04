@@ -21,8 +21,8 @@ class IssueOrderController < ApplicationController
   
   def index
     @buckets = IssueBucket.all()
-    @ordered_issues = Issue.find(:all, :conditions => "order > 0", :include => :issue_bucket, :order => "order")
-    @unordered_issues = Issue.find(:all, :conditions => "(order = 0 or order is null)", :include => :issue_bucket)
+    @ordered_issues = Issue.find(:all, :conditions => "`order` > 0", :include => :issue_bucket, :order => "`order`")
+    @unordered_issues = Issue.find(:all, :conditions => "(`order` = 0 or `order` is null)", :include => :issue_bucket)
 #    @unbucketed_issues = Issue.find(:all, :conditions => "issue_bucket_id is null or issue_bucket_id = 0")
     respond_to do |format|
       format.html { render :template => 'issue_order/index.html.erb', :layout => !request.xhr? }
