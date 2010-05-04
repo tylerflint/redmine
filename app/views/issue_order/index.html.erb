@@ -102,7 +102,7 @@
 						<div class="column_save" id="save_issue_<%= issue.id %>"><a href="javascript: void(0);" onclick="saveIssue(<%= issue.id %>)">Save</a></div>
 						-->
 					<% else %>
-						<div class="column_bucket"><%= issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></div>
+						<div class="column_bucket"><%= issue.issue_bucket_id && issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></div>
 						<!--
 						<div class="column_time"><%= issue.estimated_hours %></div>
 						<div class="column_start">TBD</div>
@@ -141,7 +141,7 @@
 						<div class="column_save" id="save_issue_<%= issue.id %>"><a href="javascript: void(0);" onclick="saveIssue(<%= issue.id %>)">Save</a></div>
 						-->
 					<% else %>
-						<div class="column_bucket"><%= issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></div>
+						<div class="column_bucket"><%= issue.issue_bucket_id && issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></div>
 						<!--
 						<div class="column_time"><%= issue.estimated_hours %></div>
 						<div class="column_start">TBD</div>
