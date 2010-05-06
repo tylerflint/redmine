@@ -71,11 +71,11 @@ class IssueOrderController < ApplicationController
   
   def save_orders
     params[:issues].split(",").each_with_index do |id, index|
-      Issue.update_all(['[order]=?', index+1], ['id=?', id])
+      Issue.update_all(['`order`=?', index+1], ['id=?', id])
     end
     if (params[:unordered_issues])
       params[:unordered_issues].split(",").each do |id|
-        Issue.update_all(['[order]=?', 0], ['id=?', id])
+        Issue.update_all(['`order`=?', 0], ['id=?', id])
       end
     end
     render :update do |page|
