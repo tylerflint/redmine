@@ -15,17 +15,15 @@
 	*html .clear{
 		height: 1px;
 	}
-	.column_name{ float: left; height: 20px; width: 450px; }
+	.column_name{ float: left; height: 20px; width: 550px; }
 	.column_bucket{ float: left; height: 20px;width: 100px; }
 	.column_time{ float: left; height: 20px;width: 175px; }
 	.column_start{ float: left; height: 20px; width: 250px;}
+	.column_project{ float: left; height: 20px; width: 250px;}
 	.sortable { cursor: move;}
 	.sortable:hover {background: none repeat scroll 0 0 #FFFFDD;}
-	.row		{position: relative; width: 100%; height:20px;
-		border:0;
-		margin-bottom:2px;
-		padding:3px;
-	}
+	.row		{position: relative; width: 100%; height:15px; border:0; margin-bottom:2px; padding:3px; font-size: 10px;}
+	.row select {font-size: 10px;}
 	div#unordered_issues div.sortable span.column_start {display:none;}
 	div#issues div.sortable span.column_time {display:none;}
 	div.dropmarker {
@@ -80,6 +78,7 @@
 				<div style="font-weight: bold; background-color: #EEEEEE;" class="row clear">
 						<div class="column_name">Un-Prioritized</div>
 						<div class="column_bucket">Bucket</div>
+						<div class="column_project">Project</div>
 						<!--
 						<span class="column_time">Estimated Hours</span>
 						-->
@@ -96,6 +95,7 @@
 							<% end %>
 							</select>
 						</div>
+						<div class="column_project"><%= issue.project.name %></div>
 						<!--
 						<div class="column_time"><input type="text" value="<%= issue.estimated_hours %>" id="issue_<%= issue.id %>_estimated_hours" /></div>
 						<div class="column_start">TBD</div>
@@ -103,6 +103,7 @@
 						-->
 					<% else %>
 						<div class="column_bucket"><%= issue.issue_bucket_id && issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></div>
+						<div class="column_project"><%= issue.project.name %></div>
 						<!--
 						<div class="column_time"><%= issue.estimated_hours %></div>
 						<div class="column_start">TBD</div>
@@ -118,6 +119,7 @@
 				<div style="font-weight: bold; background-color: #EEEEEE;" class="row clear">
 						<div class="column_name">Current Prioritization</div>
 						<div class="column_bucket">Bucket</div>
+						<div class="column_project">Project</div>
 						<div style="float:right"><a href="javascript: void(0);" style="display:none;" id="saveOrder" onclick="saveOrder();">Save Order</a> &nbsp; <span id="success"></span></div>
 						<!--
 						<div class="column_start">Earliest Start Time*</div>
@@ -135,6 +137,7 @@
 							<% end %>
 							</select>
 						</div>
+						<div class="column_project"><%= issue.project.name %></div>
 						<!--
 						<div class="column_time"><input type="text" value="<%= issue.estimated_hours %>" id="issue_<%= issue.id %>_estimated_hours" /></div>
 						<div class="column_start">TBD</div>
@@ -142,6 +145,7 @@
 						-->
 					<% else %>
 						<div class="column_bucket"><%= issue.issue_bucket_id && issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></div>
+						<div class="column_project"><%= issue.project.name %></div>
 						<!--
 						<div class="column_time"><%= issue.estimated_hours %></div>
 						<div class="column_start">TBD</div>
@@ -295,6 +299,11 @@
 								row.show()
 							else
 								row.hide()
+						}else{
+							if (state == 'on')
+								row.hide()
+							else
+								row.show()
 						}
 					})
 				}

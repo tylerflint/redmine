@@ -20,12 +20,16 @@ class IssueOrderController < ApplicationController
   include Redmine::Export::PDF
   
   def index
+    project_ids = get_project_ids.join ","
+    # temp = ''
+    # project_ids.each {|id| temp << "#{id}-"}
+    # render :text => project_ids
     @buckets = IssueBucket.all()
-    @ordered_issues = Issue.find(:all, :conditions => "`order` > 0", :include => :issue_bucket, :order => "`order`")
-    @unordered_issues = Issue.find(:all, :conditions => "(`order` = 0 or `order` is null)", :include => :issue_bucket)
-#    @unbucketed_issues = Issue.find(:all, :conditions => "issue_bucket_id is null or issue_bucket_id = 0")
+    @ordered_issues = Issue.find(:all, :conditions => "`order` > 0 AND `project_id` IN (#{project_ids}) AND status_id NOT IN (3,5,6)", :include => [:issue_bucket, :project], :order => "`order`")
+    @unordered_issues = Issue.find(:all, :conditions => "(`order` = 0 OR `order` IS null) AND `project_id` IN (#{project_ids}) AND status_id NOT IN (3,5,6)", :include => [:issue_bucket, :project])
+    #    @unbucketed_issues = Issue.find(:all, :conditions => "issue_bucket_id is null or issue_bucket_id = 0")
     respond_to do |format|
-      format.html { render :template => 'issue_order/index.html.erb', :layout => !request.xhr? }
+     format.html { render :template => 'issue_order/index.html.erb', :layout => !request.xhr? }
     end
   end
 
@@ -85,6 +89,15 @@ private
     @project = Project.find(project_id)
   rescue ActiveRecord::RecordNotFound
     render_404
+  end
+  
+  def get_project_ids(project=nil)
+    project ||= @project
+    ids = [project.id]
+    project.children.each do |child|
+      ids << get_project_ids(child)
+    end
+    ids
   end
 
 end
