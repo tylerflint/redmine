@@ -61,10 +61,12 @@
 		    <fieldset class="collapsible">
 				<legend onclick="toggleFieldset(this);"><%= h("Buckets") %></legend>
 				<div id="buckets">
-					<input id="bucket_none" type="checkbox" onclick="toggleBucket(this)">None</a>
+					<input id="bucket_" type="checkbox" class="bucket" onclick="toggleBucket(this)">None</a>
+					<!--
 					<input id="bucket_all" type="checkbox" class="bucket" onclick="toggleBucket(this)" checked="checked">All</a>
+					-->
 		  			<% @buckets.each do |bucket| %>
-						<input type="checkbox" class="bucket" onclick="toggleBucket(this)" id="bucket_<%= bucket.id %>" checked="checked"><%= bucket.name %></input>
+						<input type="checkbox" class="bucket" onclick="toggleBucket(this)" id="bucket_<%= bucket.id %>"><%= bucket.name %></input>
 						<a href="javascript: void(0);" onclick="removeBucket(<%=bucket.id%>);">(X)</a>
 					<% end %>
 				</div>
@@ -84,7 +86,7 @@
 						-->
 				</div>
 				<% @unordered_issues.each do |issue| %>
-				<div id="issue_<%= issue.id %>"  class="sortable row clear bucket_<%= issue.issue_bucket_id %>">
+				<div id="issue_<%= issue.id %>"  class="sortable row clear bucket_<%= issue.issue_bucket_id %>" style="display: none">
 				    <div class="column_name"><%= link_to issue.subject, :controller => 'issues', :action => 'show', :id => issue %></div>
 					<% if (User.current.admin?) %>
 						<div class="column_bucket">
@@ -126,7 +128,7 @@
 						-->
 				</div>
 				<% @ordered_issues.each do |issue| %>
-				<div id="issue_<%= issue.id %>"  class="sortable row clear bucket_<%= issue.issue_bucket_id %>">
+				<div id="issue_<%= issue.id %>"  class="sortable row clear bucket_<%= issue.issue_bucket_id %>" style="display: none">
 				    <div class="column_name"><%= link_to issue.subject, :controller => 'issues', :action => 'show', :id => issue %></div>
 					<% if (User.current.admin?) %>
 						<div class="column_bucket">
@@ -166,6 +168,7 @@
 			Sortable.create('issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true, onUpdate: function(){ $('saveOrder').show(); $('success').hide(); updateEstimatedTimes(); colorRows(); }})
 			updateEstimatedTimes()
 			colorRows()
+			toggleBucket()
 			
 			function updateEstimatedTimes(){
 				return true;
@@ -261,51 +264,35 @@
 			}
 			
 			function toggleBucket (bucket) {
-				var state = (bucket.checked)? 'on' : 'off'
-				// bucket_none
-				if (bucket.id == 'bucket_none'){
-					// uncheck all boxes
-					$$('.bucket').each(function(box){
-						box.checked = false
-					})
-					$$('.sortable').each(function(row){
-						if (row.hasClassName('bucket_') || row.hasClassName('bucket_0')){
-							if(state == 'on')
-								row.show()
-							else
-								row.hide()
-						} else {
-							if(state == 'on')
-								row.hide()
-							else
-								row.show()
-						}
-					})
-					// hide all issues without the 'none' class
-				// bucket_all	
-				} else if (bucket.id == 'bucket_all'){
-					$$('.bucket').each(function(box){
-						box.checked = true
-					})
-					$('bucket_none').checked = false
-					$$('.sortable').each(function(row){
-						row.show()
-					})
-				} else {
-					$('bucket_none').checked = false
-					$$('.sortable').each(function(row){
-						if (row.hasClassName(bucket.id)){
-							if (state == 'on')
-								row.show()
-							else
-								row.hide()
-						}else{
-							if (state == 'on')
-								row.hide()
-							else
-								row.show()
+				if (!bucket) {
+					$$('.bucket').each(function  (b) {
+						if (b.checked) {
+							bucket = b
 						}
 					})
 				}
+				if(!bucket) return 
+				var state = (bucket.checked)? 'on' : 'off'
+				// uncheck all others
+				if (state == 'on') {
+					$$('.bucket').each(function (b) {
+						if (b.id != bucket.id) b.checked = false
+					})
+				}
+				
+				// show/hide rows
+				if (state == 'on') {
+					$$('.sortable').each(function  (row) {
+						if (row.hasClassName(bucket.id)) 
+							row.show()
+						else
+							row.hide()
+					})
+				} else{
+					$$('.sortable').each(function  (row) {
+						row.hide()
+					})
+				}
 			}
+			
 		</script>
