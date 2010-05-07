@@ -79,7 +79,9 @@
 			<div id="unordered_issues" class="list issues clear header" style="margin-right: 5px;">
 				<div style="font-weight: bold; background-color: #EEEEEE;" class="row clear">
 						<div class="column_name">Un-Prioritized</div>
-						<div class="column_bucket">Bucket</div>
+						<% if (User.current.admin?) %>
+							<div class="column_bucket">Bucket</div>
+						<% end %>
 						<div class="column_project">Project</div>
 						<!--
 						<span class="column_time">Estimated Hours</span>
@@ -104,7 +106,9 @@
 						<div class="column_save" id="save_issue_<%= issue.id %>"><a href="javascript: void(0);" onclick="saveIssue(<%= issue.id %>)">Save</a></div>
 						-->
 					<% else %>
+						<!--
 						<div class="column_bucket"><%= issue.issue_bucket_id && issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></div>
+						-->
 						<div class="column_project"><%= issue.project.name %></div>
 						<!--
 						<div class="column_time"><%= issue.estimated_hours %></div>
@@ -120,7 +124,9 @@
 			<div id="issues" class="list issues clear header"  style="margin-right: 5px;" >
 				<div style="font-weight: bold; background-color: #EEEEEE;" class="row clear">
 						<div class="column_name">Current Prioritization</div>
-						<div class="column_bucket">Bucket</div>
+						<% if (User.current.admin?) %>
+							<div class="column_bucket">Bucket</div>
+						<% end %>
 						<div class="column_project">Project</div>
 						<div style="float:right"><a href="javascript: void(0);" style="display:none;" id="saveOrder" onclick="saveOrder();">Save Order</a> &nbsp; <span id="success"></span></div>
 						<!--
@@ -146,7 +152,9 @@
 						<div class="column_save" id="save_issue_<%= issue.id %>"><a href="javascript: void(0);" onclick="saveIssue(<%= issue.id %>)">Save</a></div>
 						-->
 					<% else %>
+						<!--
 						<div class="column_bucket"><%= issue.issue_bucket_id && issue.issue_bucket_id > 0 ? issue.issue_bucket.name : 'NONE' %></div>
+						-->
 						<div class="column_project"><%= issue.project.name %></div>
 						<!--
 						<div class="column_time"><%= issue.estimated_hours %></div>
