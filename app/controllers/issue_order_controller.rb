@@ -32,7 +32,7 @@ class IssueOrderController < ApplicationController
      format.html { render :template => 'issue_order/index.html.erb', :layout => !request.xhr? }
     end
   end
-
+  
   def add_bucket
     @bucket = IssueBucket.new(params[:issue_bucket])
     @bucket.save
