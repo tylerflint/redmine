@@ -130,7 +130,9 @@
 					<div class="column_bucket">Bucket</div>
 				<% end %>
 				<div class="column_project">Project</div>
+				<!--
 				<div style="float:right"><a href="javascript: void(0);" style="display:none;" id="saveOrder" onclick="saveOrder();">Save Order</a> &nbsp; <span id="success"></span></div>
+				-->
 				<!--
 				<div class="column_start">Earliest Start Time*</div>
 				-->
@@ -174,8 +176,8 @@
 -->
 <script>
 	sections = ['unordered_issues', 'issues'];
-	Sortable.create('unordered_issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true, onUpdate: function(){colorRows()}})
-	Sortable.create('issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true, onUpdate: function(){ $('saveOrder').show(); $('success').hide(); updateEstimatedTimes(); colorRows(); }})
+	// Sortable.create('unordered_issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true, onUpdate: function(){colorRows()}})
+	// 	Sortable.create('issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true, onUpdate: function(){ $('saveOrder').show(); $('success').hide(); updateEstimatedTimes(); colorRows(); }})
 	updateEstimatedTimes()
 	colorRows()
 	toggleBucket()
@@ -238,7 +240,7 @@
 		if ($('issues').select('.sortable').length > 0){
 			issue_array = Sortable.sequence('issues').join(",");
 		}
-		new Ajax.Request('/issue_order/save_orders', {
+		new Ajax.Request('/issue_order/save_global_orders', {
 						evalScripts:true,
 						parameters:{
 								unordered_issues: unordered_issue_array,

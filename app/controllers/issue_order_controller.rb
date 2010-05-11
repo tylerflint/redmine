@@ -20,10 +20,9 @@ class IssueOrderController < ApplicationController
   include Redmine::Export::PDF
   
   def index
+    @projects = Project.visible.find(:all, :order => 'id, parent_id') 
+    @tree = create_project_tree
     project_ids = get_project_ids.join ","
-    # temp = ''
-    # project_ids.each {|id| temp << "#{id}-"}
-    # render :text => project_ids
     @buckets = IssueBucket.all()
     @ordered_issues = Issue.find(:all, :conditions => "`order` > 0 AND `project_id` IN (#{project_ids}) AND status_id NOT IN (3,5,6)", :include => [:issue_bucket, :project], :order => "`order`")
     @unordered_issues = Issue.find(:all, :conditions => "(`order` = 0 OR `order` IS null) AND `project_id` IN (#{project_ids}) AND status_id NOT IN (3,5,6)", :include => [:issue_bucket, :project])
@@ -31,6 +30,15 @@ class IssueOrderController < ApplicationController
     respond_to do |format|
      format.html { render :template => 'issue_order/index.html.erb', :layout => !request.xhr? }
     end
+  end
+  
+  def global
+    @projects = Project.visible.find(:all, :order => 'id, parent_id') 
+    @tree = create_project_tree
+    project_ids = get_member_project_ids.join ","
+    @buckets = IssueBucket.all()
+    @ordered_issues = Issue.find(:all, :conditions => "`order` > 0 AND `project_id` IN (#{project_ids}) AND status_id NOT IN (3,5,6)", :include => [:issue_bucket, :project], :order => "`order`")
+    @unordered_issues = Issue.find(:all, :conditions => "(`order` = 0 OR `order` IS null) AND `project_id` IN (#{project_ids}) AND status_id NOT IN (3,5,6)", :include => [:issue_bucket, :project])
   end
   
   def add_bucket
@@ -82,7 +90,7 @@ class IssueOrderController < ApplicationController
       page['success'].innerHTML = ""
     end
   end
-
+  
 private
   def find_project
     project_id = (params[:issue] && params[:issue][:project_id]) || params[:project_id]
@@ -98,6 +106,24 @@ private
       ids << get_project_ids(child)
     end
     ids
+  end
+  
+  def get_member_project_ids
+    project_ids = []
+    @projects.each do |p|
+      project_ids << p.id
+    end
+    project_ids
+  end
+  
+  def create_project_tree
+    tree = []
+    @projects.each do |p|
+      name = p.name
+      name = tree[p.parent_id] + " :: " + name if (p.parent_id)
+      tree[p.id] = name
+    end
+    tree
   end
 
 end
