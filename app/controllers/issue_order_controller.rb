@@ -80,9 +80,9 @@ class IssueOrderController < ApplicationController
     @preissue = Issue.find(params[:previous_id])
     @nextissue = Issue.find(params[:next_id])
     usepre = false
-    if (@issue.order > 0 && @issue.order < @preissue.order){
+    if (@issue.order > 0 && @issue.order < @preissue.order)
       usepre = true
-    } #we only want to use the one above it if it's not first being put in.
+    end #we only want to use the one above it if it's not first being put in.
     
     if (usepre == false)
       # we moved it up
