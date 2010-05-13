@@ -173,12 +173,58 @@
 * Other projects may move this number around, but this is the earliest estimated start time for the given issue.
 -->
 <script>
+	// override the droppable "fire" function for our needs
+	Droppables.fire = function(event, element){
+		orderChanged(element)
+		if(!this.last_active) return;
+	    Position.prepare();
+
+	    if (this.isAffected([Event.pointerX(event), Event.pointerY(event)], element, this.last_active))
+	      if (this.last_active.onDrop) {
+	        this.last_active.onDrop(element, this.last_active.element, event);
+	        return true;
+	      }
+	}
+	
 	sections = ['unordered_issues', 'issues'];
-	Sortable.create('unordered_issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true, onUpdate: function(){colorRows()}})
-	Sortable.create('issues', {tag:'div', dropOnEmpty: true, only:'sortable', constraint: 'vertical', containment: sections, ghosting: true, onUpdate: function(){ $('saveOrder').show(); $('success').hide(); updateEstimatedTimes(); colorRows(); }})
+	Sortable.create('unordered_issues', {
+		 tag:'div'
+		,dropOnEmpty: true
+		,only:'sortable'
+		,constraint: 'vertical'
+		,containment: sections
+		,ghosting: true
+		,onUpdate: function(){colorRows()}
+	})
+	Sortable.create('issues', {
+		 tag:'div'
+		,dropOnEmpty: true
+		,only:'sortable'
+		,constraint: 'vertical'
+		,containment: sections
+		,ghosting: true
+		// ,onUpdate: orderChanged
+	})
 	updateEstimatedTimes()
 	colorRows()
 	toggleBucket()
+	
+	function orderChanged (row) {
+		updateEstimatedTimes()
+		colorRows()
+		// lets do an ajax request IF it's a child of the issues list, and not of the unprioritized list
+		if (row.descendantOf('issues')) {
+			new Ajax.Request('/issue_order/save_orders', {
+				// evalScripts:true,
+				method: 'post',
+				parameters:{
+					 'issue_id': row.id.match(/[0-9]+/)
+					,'previous_id': row.previous().id.match(/[0-9]+/)
+					,'next_id': row.next().id.match(/[0-9]+/)
+				}
+			});
+		}
+	}
 	
 	function updateEstimatedTimes(){
 		return true;
