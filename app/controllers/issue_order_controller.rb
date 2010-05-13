@@ -79,10 +79,19 @@ class IssueOrderController < ApplicationController
     @issue = Issue.find(params[:issue_id])
     @preissue = Issue.find(params[:previous_id])
     @nextissue = Issue.find(params[:next_id])
-    if (@issue.order > @preissue.order)
+    usepre = false
+    if (@issue.order > 0 && @issue.order < @preissue.order){
+      usepre = true
+    } #we only want to use the one above it if it's not first being put in.
+    
+    if (usepre == false)
       # we moved it up
       neworder = @nextissue.order
-      Issue.update_all('`order`=`order`+1', ['`order`>=? and `order`<?', @nextissue.order, @issue.order]);
+      if (@issue.order > 0)
+        Issue.update_all('`order`=`order`+1', ['`order`>=? and `order`<?', @nextissue.order, @issue.order]);
+      else
+        Issue.update_all('`order`=`order`+1', ['`order`>=?', @nextissue.order])
+      end
       @issue.order = neworder
       @issue.save
     else
@@ -92,6 +101,7 @@ class IssueOrderController < ApplicationController
       @issue.order = neworder
       @issue.save
     end
+
     render :update do |page|
       page['success'].innerHTML = ''
     end
