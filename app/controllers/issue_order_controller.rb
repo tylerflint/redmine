@@ -76,6 +76,25 @@ class IssueOrderController < ApplicationController
     params[:issue_id]
     params[:previous_id]  # nil if issue_id is at the top of the list
     params[:next_id]      # nil if issue_id is at the bottom of the list
+    @issue = Issue.find(params[:issue_id])
+    @preissue = Issue.find(params[:previous_id])
+    @nextissue = Issue.find(params[:next_id])
+    if (@issue.order > @preissue.order)
+      # we moved it up
+      neworder = @nextissue.order
+      Issue.update_all('`order`=`order`+1', ['`order`>=? and `order`<?', @nextissue.order, @issue.order]);
+      @issue.order = neworder
+      @issue.save
+    else
+      #we moved it down
+      neworder = @preissue.order
+      Issue.update_all('`order`=`order`-1', ['`order`>? and `order`<=?', @issue.order, @preissue.order]);
+      @issue.order = neworder
+      @issue.save
+    end
+    render :update do |page|
+      page['success'].innerHTML = ''
+    end
     # params[:issues].split(",").each_with_index do |id, index|
     #   Issue.update_all(['`order`=?', index+1], ['id=?', id])
     # end
