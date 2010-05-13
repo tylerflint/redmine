@@ -77,29 +77,42 @@ class IssueOrderController < ApplicationController
     params[:previous_id]  # nil if issue_id is at the top of the list
     params[:next_id]      # nil if issue_id is at the bottom of the list
     @issue = Issue.find(params[:issue_id])
-    @preissue = Issue.find(params[:previous_id])
-    @nextissue = Issue.find(params[:next_id])
-    usepre = false
-    if (@issue.order > 0 && @issue.order < @preissue.order)
-      usepre = true
-    end #we only want to use the one above it if it's not first being put in.
+    @preissue = Issue.find(params[:previous_id]) if params[:previous_id] != ''
+    @nextissue = Issue.find(params[:next_id]) if params[:next_id] != ''
+    @issue.order ||= 0
     
-    if (usepre == false)
-      # we moved it up
-      neworder = @nextissue.order
-      if (@issue.order > 0)
-        Issue.update_all('`order`=`order`+1', ['`order`>=? and `order`<?', @nextissue.order, @issue.order]);
-      else
-        Issue.update_all('`order`=`order`+1', ['`order`>=?', @nextissue.order])
-      end
+    if !@preissue && !@nextissue
+      Issue.update_all('`order`=`order`+1', ['`order`>=?', 1])
+      @issue.order = 1
+      @issue.save
+    elsif  @issue.order == 0 && !@nextissue
+      neworder = @preissue.order + 1
+      Issue.update_all('`order`=`order`+1', ['`order`>?', @preissue.order]);
       @issue.order = neworder
       @issue.save
     else
-      #we moved it down
-      neworder = @preissue.order
-      Issue.update_all('`order`=`order`-1', ['`order`>? and `order`<=?', @issue.order, @preissue.order]);
-      @issue.order = neworder
-      @issue.save
+      usepre = false
+      if (@issue.order > 0  && @preissue && @issue.order < @preissue.order)
+        usepre = true
+      end #we only want to use the one above it if it's not first being put in.
+    
+      if (usepre == false)
+        # we moved it up
+        neworder = @nextissue.order
+        if (@issue.order > 0)
+          Issue.update_all('`order`=`order`+1', ['`order`>=? and `order`<?', @nextissue.order, @issue.order]);
+        else
+          Issue.update_all('`order`=`order`+1', ['`order`>=?', @nextissue.order])
+        end
+        @issue.order = neworder
+        @issue.save
+      else
+        #we moved it down
+        neworder = @preissue.order
+        Issue.update_all('`order`=`order`-1', ['`order`>? and `order`<=?', @issue.order, @preissue.order]);
+        @issue.order = neworder
+        @issue.save
+      end
     end
 
     render :update do |page|

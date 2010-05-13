@@ -214,13 +214,15 @@
 		colorRows()
 		// lets do an ajax request IF it's a child of the issues list, and not of the unprioritized list
 		if (row.descendantOf('issues')) {
+			previous = row.previous()
+			next = row.next()
 			new Ajax.Request('/issue_order/save_orders', {
 				// evalScripts:true,
 				method: 'post',
 				parameters:{
 					 'issue_id': row.id.match(/[0-9]+/)
-					,'previous_id': row.previous().id.match(/[0-9]+/)
-					,'next_id': row.next().id.match(/[0-9]+/)
+					,'previous_id': (previous) ? previous.id.match(/[0-9]+/) : ''
+					,'next_id': (next) ? next.id.match(/[0-9]+/) : ''
 				}
 			});
 		}
