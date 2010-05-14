@@ -67,9 +67,6 @@
 			-->
   			<% @buckets.each do |bucket| %>
 				<input type="checkbox" class="bucket" onclick="toggleBucket(this)" id="bucket_<%= bucket.id %>"><%= bucket.name %></input>
-				<% if (User.current.admin?) %>
-					<a href="javascript: void(0);" onclick="removeBucket(<%=bucket.id%>);">(X)</a>
-				<% end %>
 			<% end %>
 		</div>
     </fieldset>
