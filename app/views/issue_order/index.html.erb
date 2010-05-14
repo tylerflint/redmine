@@ -61,12 +61,9 @@
     <fieldset class="collapsible">
 		<legend onclick="toggleFieldset(this);"><%= h("Buckets") %></legend>
 		<div id="buckets">
-			<input id="bucket_" type="checkbox" class="bucket" onclick="toggleBucket(this)">None</a>
-			<!--
-			<input id="bucket_all" type="checkbox" class="bucket" onclick="toggleBucket(this)" checked="checked">All</a>
-			-->
+			<input id="bucket_" type="checkbox" class="bucket" onclick="toggleBucket(this)" />None (<span id="bucket__count"></span>)
   			<% @buckets.each do |bucket| %>
-				<input type="checkbox" class="bucket" onclick="toggleBucket(this)" id="bucket_<%= bucket.id %>"><%= bucket.name %></input>
+				<input type="checkbox" class="bucket" onclick="toggleBucket(this)" id="bucket_<%= bucket.id %>" /><%= bucket.name %> (<span id="bucket_<%= bucket.id %>_count"></span>)
 			<% end %>
 		</div>
     </fieldset>
@@ -204,6 +201,7 @@
 	})
 	updateEstimatedTimes()
 	colorRows()
+	updateCounts()
 	toggleBucket()
 	
 	function orderChanged (row) {
@@ -264,6 +262,8 @@
 				'issue[issue_bucket_id]': bucket_id
 			}
 		});
+		toggleBucket()
+		updateCounts()
 	}
 	
 	function removeBucket(bucket_id){
@@ -348,6 +348,16 @@
 				row.hide()
 			})
 		}
+	}
+	
+	function updateCounts () {
+		$$('.bucket').each(function (b) {
+			var count = 0
+			$$('.sortable').each(function (row){
+				if (row.hasClassName(b.id)) count++
+			})
+			$(b.id  + "_count").innerHTML = count
+		})
 	}
 	
 </script>
