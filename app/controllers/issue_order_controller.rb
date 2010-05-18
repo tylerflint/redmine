@@ -28,8 +28,8 @@ class IssueOrderController < ApplicationController
     end
     @tree = create_project_tree
     @buckets = IssueBucket.all()
-    @ordered_issues = Issue.find(:all, :conditions => "`order` > 0 AND `project_id` IN (#{project_ids}) AND status_id NOT IN (3,5,6)", :include => [:issue_bucket, :project], :order => "`order`")
-    @unordered_issues = Issue.find(:all, :conditions => "(`order` = 0 OR `order` IS null) AND `project_id` IN (#{project_ids}) AND status_id NOT IN (3,5,6)", :include => [:issue_bucket, :project])
+    @ordered_issues = Issue.find(:all, :conditions => "`order` > 0 AND `project_id` IN (#{project_ids}) AND status_id NOT IN (3,5,6)", :include => [:issue_bucket, :project, :category], :order => "`order`")
+    @unordered_issues = Issue.find(:all, :conditions => "(`order` = 0 OR `order` IS null) AND `project_id` IN (#{project_ids}) AND status_id NOT IN (3,5,6)", :include => [:issue_bucket, :project, :category])
     #    @unbucketed_issues = Issue.find(:all, :conditions => "issue_bucket_id is null or issue_bucket_id = 0")
     respond_to do |format|
      format.html { render :template => 'issue_order/index.html.erb', :layout => !request.xhr? }

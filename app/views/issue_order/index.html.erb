@@ -19,7 +19,7 @@
 	.column_bucket{ float: left; height: 20px;width: 100px; }
 	.column_time{ float: left; height: 20px;width: 175px; }
 	.column_start{ float: left; height: 20px; width: 250px;}
-	.column_project{ float: left; height: 20px; width: 250px;}
+	.column_project{ float: left; height: 20px; width: 450px;}
 	.sortable { cursor: move;}
 	.sortable:hover {background: none repeat scroll 0 0 #FFFFDD;}
 	.row		{position: relative; width: 100%; height:15px; border:0; margin-bottom:2px; padding:3px; font-size: 10px;}
@@ -95,7 +95,7 @@
 					<% end %>
 					</select>
 				</div>
-				<div class="column_project"><%= @tree[issue.project.id] %></div>
+				<div class="column_project"><%= @tree[issue.project.id] %><%= " - #{issue.category}" if issue.category  %></div>
 				<!--
 				<div class="column_time"><input type="text" value="<%= issue.estimated_hours %>" id="issue_<%= issue.id %>_estimated_hours" /></div>
 				<div class="column_start">TBD</div>
@@ -141,7 +141,7 @@
 					<% end %>
 					</select>
 				</div>
-				<div class="column_project"><%= @tree[issue.project.id] %></div>
+				<div class="column_project"><%= @tree[issue.project.id] %><%= " - #{issue.category}" if issue.category  %></div>
 				<!--
 				<div class="column_time"><input type="text" value="<%= issue.estimated_hours %>" id="issue_<%= issue.id %>_estimated_hours" /></div>
 				<div class="column_start">TBD</div>
