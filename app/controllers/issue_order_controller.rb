@@ -160,7 +160,7 @@ private
     tree = []
     @projects.each do |p|
       name = p.name
-      name = tree[p.parent_id] + " :: " + name if (p.parent_id)
+      name = tree[p.parent_id] + " :: " + name if (p.parent_id && tree[p.parent.id])
       tree[p.id] = name
     end
     tree
