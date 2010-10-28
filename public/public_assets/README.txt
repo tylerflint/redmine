@@ -1,0 +1,1 @@
+Dummy file to get redmine to work on Heroku
