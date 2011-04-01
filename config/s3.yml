@@ -1,0 +1,11 @@
+production:
+  access_key_id: AKIAIGD4BGCJYJ4KSKLQ
+  secret_access_key: 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
+  bucket: redmine_prod
+  cname_bucket: false
+
+development:
+  access_key_id: AKIAIGD4BGCJYJ4KSKLQ
+  secret_access_key: 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
+  bucket: redmine_dev
+  cname_bucket: false
